@@ -5,56 +5,51 @@
  */
 package UDP;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
+import java.io.*;
+import java.net.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author andre
  */
-public class Client implements Runnable{
+public class Client {
 
-    private final int port;
+    public static void main(String args[]) throws Exception {
+        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Por favor la dirección IP del servidor");
+        String ipAdrress = inFromUser.readLine();
+        System.out.println("Por favor ingrese el puerto");
+        int port = Integer.parseInt(inFromUser.readLine());
+        System.out.println("Por favor ingrese el número de objetos a enviar");
+        
+        DatagramSocket clientSocket = new DatagramSocket();
+        InetAddress IPAddress = InetAddress.getByName(ipAdrress);
+        byte[] sendData = new byte[1024];
+        byte[] receiveData = new byte[1024];
+        String sentence = inFromUser.readLine();
+        int numberObj = Integer.parseInt(sentence);
+        System.out.println("Número de objetos: " + numberObj);
 
-    public Client(int port) {
-        this.port = port;
-    }
+        String aEnviar;
+        Date fecha;
+        long mS = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        for (int i = 0; i < numberObj; i++) {
+            fecha = new Date(mS);
 
-    @Override
-    public void run() {
-        /**
-         * Bind the client socket to the port on which you expect to
-         * read incoming messages
-         */
-        try (DatagramSocket clientSocket = new DatagramSocket(port)) {
-            /**
-             * Create a byte array buffer to store incoming data. If the message length
-             * exceeds the length of your buffer, then the message will be truncated. To avoid this,
-             * you can simply instantiate the buffer with the maximum UDP packet size, which
-             * is 65506
-             */
-
-            byte[] buffer = new byte[65507];
-
-            // Set a timeout of 3000 ms for the client.
-            clientSocket.setSoTimeout(3000);
-            while (true) {
-                DatagramPacket datagramPacket = new DatagramPacket(buffer, 0, buffer.length);
-
-                /**
-                 * The receive method will wait for 3000 ms for data.
-                 * After that, the client will throw a timeout exception.
-                 */
-                clientSocket.receive(datagramPacket);
-
-                String receivedMessage = new String(datagramPacket.getData());
-                System.out.println(receivedMessage);
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("Timeout. Client is closing.");
+            aEnviar = "numeroSecuencia= " + (i+1) + "\n" + "marcaTiempo=" + sdf.format(fecha);
+            sendData = aEnviar.getBytes();
+            mS = System.currentTimeMillis();
+            System.out.println(aEnviar);
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+            clientSocket.send(sendPacket);
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            clientSocket.receive(receivePacket);
         }
+
+        clientSocket.close();
     }
+
 }

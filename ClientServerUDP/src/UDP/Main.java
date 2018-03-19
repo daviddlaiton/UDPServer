@@ -16,11 +16,7 @@ import java.util.concurrent.Executors;
 public class Main {
     public static void main(String[] args) {
         int port = 50001;
-        Server server = new Server(port);
-        Client client = new Client(port);
+        System.out.println(port);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        executorService.submit(client);
-        executorService.submit(server);
     }
 }
