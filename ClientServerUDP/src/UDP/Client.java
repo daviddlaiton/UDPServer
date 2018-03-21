@@ -23,7 +23,7 @@ public class Client {
         System.out.println("Por favor ingrese el puerto");
         int port = Integer.parseInt(inFromUser.readLine());
         System.out.println("Por favor ingrese el número de objetos a enviar");
-        
+
         DatagramSocket clientSocket = new DatagramSocket();
         InetAddress IPAddress = InetAddress.getByName(ipAdrress);
         byte[] sendData = new byte[1024];
@@ -36,19 +36,21 @@ public class Client {
         Date fecha;
         long mS = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-        for (int i = 0; i < numberObj; i++) {
+        for (int i = 0; i <= numberObj; i++) {
             fecha = new Date(mS);
-
-            aEnviar = "numeroSecuencia= " + (i+1) + "\n" + "marcaTiempo=" + sdf.format(fecha);
+            if (i == numberObj) {
+                aEnviar = "@";
+            } else {
+                aEnviar = "numeroSecuencia= " + (i + 1) + " numTotalObj= " + numberObj + " marcaTiempo= " + sdf.format(fecha);
+            }
             sendData = aEnviar.getBytes();
             mS = System.currentTimeMillis();
-            System.out.println(aEnviar);
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
             clientSocket.send(sendPacket);
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             clientSocket.receive(receivePacket);
+            String modifiedSentence= new String(receivePacket.getData());
         }
-
         clientSocket.close();
     }
 
