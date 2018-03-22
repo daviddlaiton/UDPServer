@@ -35,6 +35,7 @@ public class Server {
         while (true) {
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             s.procesarInfo(serverSocket, receivePacket);
+            System.out.println("Llego");
         }
     }
 
@@ -50,6 +51,7 @@ public class Server {
             if (e.getIP().equals(ip) && e.getPuerto() == port) {
                 existe = true;
                 c = e;
+                System.out.println("existe");
             }
 
         }
@@ -57,6 +59,7 @@ public class Server {
         if (!existe) {
             c = new Cliente(port, ip);
             clientes.add(c);
+            System.out.println("no existe");
         }
 
         String sentence = new String(receivePacket.getData());

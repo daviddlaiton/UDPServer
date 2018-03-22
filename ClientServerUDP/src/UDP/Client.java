@@ -42,15 +42,17 @@ public class Client {
                 aEnviar = "@";
             } else {
                 aEnviar = "numeroSecuencia= " + (i + 1) + " numTotalObj= " + numberObj + " marcaTiempo= " + sdf.format(fecha);
+                System.out.println(aEnviar);
             }
             sendData = aEnviar.getBytes();
             mS = System.currentTimeMillis();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
             clientSocket.send(sendPacket);
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            clientSocket.receive(receivePacket);
-            String modifiedSentence= new String(receivePacket.getData());
         }
+        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+        clientSocket.receive(receivePacket);
+        String modifiedSentence= new String(receivePacket.getData());
+        System.out.println(modifiedSentence);
         clientSocket.close();
     }
 
