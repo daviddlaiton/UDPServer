@@ -36,14 +36,12 @@ public class Client {
         Date fecha;
         long mS = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-        for (int i = 0; i <= numberObj; i++) {
+        for (int i = 0; i < numberObj; i++) {
             fecha = new Date(mS);
-            if (i == numberObj) {
-                aEnviar = "@";
-            } else {
-                aEnviar = "numeroSecuencia= " + (i + 1) + " numTotalObj= " + numberObj + " marcaTiempo= " + sdf.format(fecha);
-                System.out.println(aEnviar);
-            }
+
+            aEnviar = "numeroSecuencia= " + (i + 1) + " numTotalObj= " + numberObj + " marcaTiempo= " + sdf.format(fecha);
+            System.out.println(aEnviar);
+
             sendData = aEnviar.getBytes();
             mS = System.currentTimeMillis();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
@@ -51,7 +49,7 @@ public class Client {
         }
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
         clientSocket.receive(receivePacket);
-        String modifiedSentence= new String(receivePacket.getData());
+        String modifiedSentence = new String(receivePacket.getData());
         System.out.println(modifiedSentence);
         clientSocket.close();
     }

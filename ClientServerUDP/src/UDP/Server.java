@@ -33,9 +33,22 @@ public class Server {
         byte[] receiveData = new byte[1024];
 
         while (true) {
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            
+            for (int i = 0; i < clientes.size(); i++) {
+                Cliente c = (Cliente) clientes.get(i);
+                long time = System.currentTimeMillis();
+                long hola = time - c.getLastChange();
+                System.out.println(hola);
+                if (hola > 10) {
+                    c.terminarProceso();
+                    clientes.remove(c);
+                    System.out.println("Timeout");
+                } else {
+                    System.out.println("no Timeout");
+                }
+            }
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);                    
             s.procesarInfo(serverSocket, receivePacket);
-            System.out.println("Llego");
         }
     }
 
@@ -51,15 +64,12 @@ public class Server {
             if (e.getIP().equals(ip) && e.getPuerto() == port) {
                 existe = true;
                 c = e;
-                System.out.println("existe");
             }
-
         }
 
         if (!existe) {
             c = new Cliente(port, ip);
             clientes.add(c);
-            System.out.println("no existe");
         }
 
         String sentence = new String(receivePacket.getData());
@@ -76,6 +86,7 @@ public class Server {
         double suma = 0;
         double numObtLlegaron = 0;
         int numObj = 0;
+        long fin;
 
         public Cliente(int port, String ip) throws Exception {
             puerto = port;
@@ -99,38 +110,42 @@ public class Server {
             puerto = port;
         }
 
+        public long getLastChange() {
+            return fin;
+        }
+
         public DatagramPacket recibirLinea(String sentence, DatagramPacket receivePacket) throws Exception {
             byte[] sendData = new byte[1024];
             String fecha;
 
-            
-            if (sentence.charAt(0) == '@') {
-                System.out.println("Promedio: " + (suma / numObtLlegaron));
-                writer.println("Promedio: " + (suma / numObtLlegaron));
-                System.out.println("Numero de objetos recibidos: " + numObtLlegaron);
-                writer.println("Numero de objetos recibidos: " + numObtLlegaron);
-                System.out.println("Numero de objetos faltantes: " + (numObj - numObtLlegaron));
-                writer.println("Numero de objetos faltantes: " + (numObj - numObtLlegaron));
-                writer.close();
-            } else {
-                numObtLlegaron++;
-                String[] splitSentence = sentence.split(" ");
-                numObj = Integer.parseInt(splitSentence[3]);
-                fecha = splitSentence[5] + " " + splitSentence[6];
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-                Date d = sdf.parse(fecha);
-                long fin = System.currentTimeMillis();
-                long init = d.getTime();
-                long tiempo = fin - init;
-                writer.println(numObtLlegaron + ": " + tiempo + " ms");
-                suma += tiempo;
-            }
+            numObtLlegaron++;
+            String[] splitSentence = sentence.split(" ");
+            numObj = Integer.parseInt(splitSentence[3]);
+            fecha = splitSentence[5] + " " + splitSentence[6];
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+            Date d = sdf.parse(fecha);
+            fin = System.currentTimeMillis();
+            long init = d.getTime();
+            long tiempo = fin - init;
+            writer.println(numObtLlegaron + ": " + tiempo + " ms");
+            suma += tiempo;
+
             InetAddress IPAddress = receivePacket.getAddress();
             String capitalizedSentence = sentence.toUpperCase();
             sendData = capitalizedSentence.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, puerto);
 
             return sendPacket;
+        }
+
+        public void terminarProceso() {
+            System.out.println("Promedio: " + (suma / numObtLlegaron));
+            writer.println("Promedio: " + (suma / numObtLlegaron));
+            System.out.println("Numero de objetos recibidos: " + numObtLlegaron);
+            writer.println("Numero de objetos recibidos: " + numObtLlegaron);
+            System.out.println("Numero de objetos faltantes: " + (numObj - numObtLlegaron));
+            writer.println("Numero de objetos faltantes: " + (numObj - numObtLlegaron));
+            writer.close();
         }
     }
 
